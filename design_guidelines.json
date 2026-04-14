@@ -1,0 +1,112 @@
+{
+  "project": "Kutch Entrepreneur Divas (KED)",
+  "theme": "Light",
+  "archetype": "Archetype 1 (Organic & Earthy) - Soft Luxury Variant",
+  "core_aesthetic": "Pinterest elegance + modern marketplace + women entrepreneur ecosystem. Premium, elegant, calm, trustworthy, modern Indian. Category-defining.",
+  "tagline": "India's First Platform To Empower Women Entrepreneurs With Structured Growth",
+  "colors": {
+    "background": "#FDFBF9",
+    "surface": "#FAF8F5",
+    "primary": "#DCAE96",
+    "primary_hover": "#C89A82",
+    "secondary": "#E3D5CA",
+    "accent": "#F4E1D2",
+    "text_main": "#2C2A29",
+    "text_muted": "#6E6259",
+    "border": "#EBE3DC",
+    "success": "#A3B899",
+    "glass_bg": "rgba(253, 251, 249, 0.7)",
+    "glass_border": "rgba(235, 227, 220, 0.5)"
+  },
+  "typography": {
+    "primary_font": "Cormorant Garamond, serif",
+    "secondary_font": "Outfit, sans-serif",
+    "rules": {
+      "h1": "font-serif text-5xl sm:text-6xl tracking-tight text-[#2C2A29] leading-[1.1]",
+      "h2": "font-serif text-4xl tracking-tight text-[#2C2A29]",
+      "h3": "font-sans text-2xl font-medium text-[#2C2A29]",
+      "body": "font-sans text-base text-[#4A4036] leading-relaxed",
+      "labels": "font-sans text-xs uppercase tracking-[0.15em] font-medium text-[#6E6259]"
+    }
+  },
+  "spacing_and_layout": {
+    "container_padding": "px-6 md:px-12 lg:px-24",
+    "section_spacing": "py-24 md:py-32",
+    "bento_grid": "grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8",
+    "masonry_feed": "columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6",
+    "border_radius": "rounded-2xl lg:rounded-3xl"
+  },
+  "surfaces_and_effects": {
+    "cards": "bg-[#FAF8F5] border border-[#EBE3DC] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300",
+    "glass_header": "bg-[#FDFBF9]/80 backdrop-blur-xl border-b border-[#EBE3DC]/50 supports-[backdrop-filter]:bg-[#FDFBF9]/60",
+    "image_overlay": "bg-gradient-to-t from-black/40 via-black/10 to-transparent",
+    "shadows": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+  },
+  "animations": {
+    "page_transition": "framer-motion: initial opacity-0 translate-y-4, animate opacity-100 translate-y-0, duration 0.6s, ease-out",
+    "hover_card": "hover:-translate-y-1 hover:shadow-lg transition-all duration-300 ease-out",
+    "image_hover": "overflow-hidden -> child img: hover:scale-105 transition-transform duration-700 ease-in-out"
+  },
+  "components_strategy": {
+    "buttons": "rounded-full px-8 py-3 font-sans font-medium transition-all duration-300",
+    "primary_button": "bg-[#DCAE96] text-white hover:bg-[#C89A82] shadow-sm",
+    "secondary_button": "bg-transparent border border-[#DCAE96] text-[#DCAE96] hover:bg-[#FAF8F5]",
+    "shadcn_overrides": "Override all default Vercel-look borders with rounded-2xl, replace default gray borders with #EBE3DC, change ring focus to #DCAE96",
+    "data_testid_rule": "Every interactive element MUST include a data-testid attribute in kebab-case (e.g., data-testid='hero-cta-button')"
+  },
+  "media": {
+    "hero_backgrounds": [
+      {
+        "url": "https://images.unsplash.com/photo-1701901492183-5f59f341c70e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMHNvZnQlMjBiZWlnZSUyMHBpbmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3NjE2ODY5N3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract pastel render for elegant soft section backgrounds"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1682778964821-76d9840a19e1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMHNvZnQlMjBiZWlnZSUyMHBpbmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3NjE2ODY5N3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Soft pink blurry pattern for warm modern aesthetics"
+      }
+    ],
+    "entrepreneurs_and_profiles": [
+      {
+        "url": "https://images.unsplash.com/photo-1630457497120-609b2a74578c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjB3b21hbiUyMHNhcmVlJTIwZWxlZ2FudCUyMGJ1c2luZXNzfGVufDB8fHx8MTc3NjE2ODY5N3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Elegant Indian woman in saree, perfect for seller profile or hero spotlight"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1714976327142-d2aa96c1fb7f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHw0fHxpbmRpYW4lMjB3b21hbiUyMGJ1c2luZXNzJTIwb3duZXIlMjBuZXV0cmFsfGVufDB8fHx8MTc3NjE2ODY4NXww&ixlib=rb-4.1.0&q=85",
+        "description": "Confident Indian woman in modern office setting for contemporary business feel"
+      }
+    ],
+    "artisans_and_community": [
+      {
+        "url": "https://images.unsplash.com/photo-1646578486121-67aed93c4f4e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjB3b21hbiUyMGJ1c2luZXNzJTIwb3duZXIlMjBuZXV0cmFsfGVufDB8fHx8MTc3NjE2ODY4NXww&ixlib=rb-4.1.0&q=85",
+        "description": "Woman with colorful fabrics, ideal for KED Spotlight Stories or Artisan showcase"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1678082309214-3b2941e387f8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjV8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBoYW5kaWNyYWZ0JTIwYXJ0aXNhbiUyMGVsZWdhbnR8ZW58MHx8fHwxNzc2MTY4Njk3fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Woman working on art/handicraft for community and learning section"
+      }
+    ],
+    "products_and_marketplace": [
+      {
+        "url": "https://images.unsplash.com/photo-1758560936904-4eb0049284aa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwYWVzdGhldGljJTIwcHJvZHVjdCUyMG5ldXRyYWx8ZW58MHx8fHwxNzc2MTY4Njg1fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Minimalist aesthetic product for marketplace discovery feed"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1672883589583-c82951069154?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwYWVzdGhldGljJTIwcHJvZHVjdCUyMG5ldXRyYWx8ZW58MHx8fHwxNzc2MTY4Njg1fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Aesthetic soap/lifestyle product held in hand for product detail pages"
+      }
+    ]
+  },
+  "page_specific_instructions": {
+    "homepage": "Focus on the Hero Section using abstract pastel backgrounds or the elegant saree woman image. Use framer-motion for smooth scroll reveals. The 'Discovery Feed' should utilize a Pinterest-style masonry layout using 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4'.",
+    "marketplace": "Grid-based product cards with soft hover elevation (`hover:-translate-y-1 hover:shadow-lg`). Incorporate categorical filters horizontally with pill-shaped tabs.",
+    "seller_profile": "Use a split layout: soft background header merging into a pristine white/off-white content area. Large circular avatars with an overlapping 'Trust Badge' icon.",
+    "spotlight_stories": "Editorial, magazine-style layout. Large typography for quotes (`Cormorant Garamond italic`), asymmetrical image placements using bento grid."
+  },
+  "libraries_and_packages": [
+    "framer-motion",
+    "lucide-react",
+    "tailwind-merge",
+    "clsx",
+    "@radix-ui/react-icons"
+  ]
+}

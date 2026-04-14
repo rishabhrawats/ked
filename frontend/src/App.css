@@ -1,34 +1,120 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* KED App Styles */
+
+.ked-glass {
+    background: rgba(253, 251, 249, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(235, 227, 220, 0.5);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.ked-card {
+    background: #FAF8F5;
+    border: 1px solid #EBE3DC;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
+.ked-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+
+.ked-btn-primary {
+    background: #DCAE96;
     color: white;
+    border-radius: 9999px;
+    padding: 0.75rem 2rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-.App-link {
-    color: #61dafb;
+.ked-btn-primary:hover {
+    background: #C89A82;
+    box-shadow: 0 4px 15px rgba(220, 174, 150, 0.3);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+.ked-btn-secondary {
+    background: transparent;
+    border: 1px solid #DCAE96;
+    color: #DCAE96;
+    border-radius: 9999px;
+    padding: 0.75rem 2rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.ked-btn-secondary:hover {
+    background: #FAF8F5;
+}
+
+.ked-section {
+    padding: 6rem 0;
+}
+
+.ked-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .ked-container {
+        padding: 0 3rem;
     }
-    to {
-        transform: rotate(360deg);
+}
+
+@media (min-width: 1024px) {
+    .ked-container {
+        padding: 0 6rem;
     }
+}
+
+/* Image hover zoom */
+.ked-img-hover {
+    overflow: hidden;
+}
+.ked-img-hover img {
+    transition: transform 0.7s ease-in-out;
+}
+.ked-img-hover:hover img {
+    transform: scale(1.05);
+}
+
+/* Masonry grid */
+.ked-masonry {
+    columns: 1;
+    gap: 1.5rem;
+}
+@media (min-width: 640px) {
+    .ked-masonry {
+        columns: 2;
+    }
+}
+@media (min-width: 1024px) {
+    .ked-masonry {
+        columns: 3;
+    }
+}
+@media (min-width: 1280px) {
+    .ked-masonry {
+        columns: 4;
+    }
+}
+
+.ked-masonry > * {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+}
+
+/* Trust badge shimmer */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.ked-shimmer {
+    background: linear-gradient(90deg, #F4E1D2 25%, #FDFBF9 50%, #F4E1D2 75%);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
 }

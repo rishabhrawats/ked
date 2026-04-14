@@ -1,53 +1,65 @@
-import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import MobileNav from "@/components/layout/MobileNav";
+import HomePage from "@/pages/HomePage";
+import MarketplacePage from "@/pages/MarketplacePage";
+import ServicesPage from "@/pages/ServicesPage";
+import EntrepreneurProfilePage from "@/pages/EntrepreneurProfilePage";
+import ProductDetailPage from "@/pages/ProductDetailPage";
+import ServiceDetailPage from "@/pages/ServiceDetailPage";
+import CommunityPage from "@/pages/CommunityPage";
+import SpotlightPage from "@/pages/SpotlightPage";
+import BulkOrdersPage from "@/pages/BulkOrdersPage";
+import SellerOnboardingPage from "@/pages/SellerOnboardingPage";
+import AboutPage from "@/pages/AboutPage";
+import AuthPage from "@/pages/AuthPage";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  if (typeof window !== "undefined") {
+    window.scrollTo(0, 0);
+  }
+  return null;
+}
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
+function AppRoutes() {
+  const location = useLocation();
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/marketplace" element={<MarketplacePage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/entrepreneur/:id" element={<EntrepreneurProfilePage />} />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route path="/service/:id" element={<ServiceDetailPage />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/spotlight" element={<SpotlightPage />} />
+        <Route path="/bulk-orders" element={<BulkOrdersPage />} />
+        <Route path="/seller-onboarding" element={<SellerOnboardingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/auth" element={<AuthPage />} />
+      </Routes>
+    </AnimatePresence>
   );
-};
+}
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <ScrollToTop />
+      <div className="min-h-screen bg-[#FDFBF9]">
+        <Header />
+        <main>
+          <AppRoutes />
+        </main>
+        <Footer />
+        <MobileNav />
+      </div>
+    </BrowserRouter>
   );
 }
 

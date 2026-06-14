@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AlertCircle, ArrowLeft, CheckCircle, Eye, EyeOff, Sparkles } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
@@ -18,7 +18,8 @@ const initialForm = {
 };
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [isLogin, setIsLogin] = useState(searchParams.get("mode") !== "register");
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [busy, setBusy] = useState(false);

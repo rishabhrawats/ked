@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import io
 import logging
 import os
 import secrets
@@ -11,6 +12,7 @@ from typing import Any, Literal
 
 import jwt
 import bcrypt
+from PIL import Image, UnidentifiedImageError
 from bson import ObjectId
 from dotenv import load_dotenv
 from fastapi import (
@@ -52,6 +54,11 @@ ALLOWED_IMAGE_TYPES = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
     "image/webp": ".webp",
+}
+ALLOWED_IMAGE_FORMATS = {
+    "image/jpeg": "JPEG",
+    "image/png": "PNG",
+    "image/webp": "WEBP",
 }
 SESSION_COOKIE = "ked_session"
 CSRF_COOKIE = "ked_csrf"
@@ -125,6 +132,27 @@ def clean_document(document: dict[str, Any] | None) -> dict[str, Any] | None:
     result.pop("_id", None)
     result.pop("password_hash", None)
     result.pop("reset_token_hash", None)
+    return result
+
+
+def public_document(document: dict[str, Any] | None) -> dict[str, Any] | None:
+    result = clean_document(document)
+    if result:
+        result.pop("pending_changes", None)
+        result.pop("review_status", None)
+    return result
+
+
+def moderation_view(document: dict[str, Any] | None) -> dict[str, Any] | None:
+    result = clean_document(document)
+    if not result:
+        return result
+    pending_changes = result.pop("pending_changes", None)
+    if result.pop("review_status", None) == "pending" and pending_changes:
+        published_status = result.get("status")
+        result.update(pending_changes)
+        result["status"] = "pending"
+        result["published_status"] = published_status
     return result
 
 
@@ -535,24 +563,24 @@ async def change_password(
 @api.get("/public/bootstrap")
 async def public_bootstrap() -> dict[str, Any]:
     profiles = [
-        clean_document(item)
+        public_document(item)
         async for item in db.profiles.find({"status": "published"}).sort("created_at", DESCENDING)
     ]
     profile_map = {item["id"]: item for item in profiles}
     products = [
-        clean_document(item)
+        public_document(item)
         async for item in db.products.find({"status": "published"}).sort("created_at", DESCENDING)
     ]
     services = [
-        clean_document(item)
+        public_document(item)
         async for item in db.services.find({"status": "published"}).sort("created_at", DESCENDING)
     ]
     posts = [
-        clean_document(item)
+        public_document(item)
         async for item in db.posts.find({"status": "published"}).sort("created_at", DESCENDING)
     ]
     workshops = [
-        clean_document(item)
+        public_document(item)
         async for item in db.workshops.find({"status": "published"}).sort("date", ASCENDING)
     ]
     for item in products:
@@ -561,6 +589,12 @@ async def public_bootstrap() -> dict[str, Any]:
         item["provider"] = profile_map.get(item.get("profile_id"), {})
     for item in posts:
         item["founder"] = profile_map.get(item.get("profile_id"), {})
+        item["excerpt"] = item.get("excerpt") or item.get("description", "")
+        item["readTime"] = item.get("readTime") or "3 min read"
+        created_at = item.get("published_at") or item.get("created_at")
+        item["date"] = item.get("date") or (
+            created_at.strftime("%B %Y") if isinstance(created_at, datetime) else ""
+        )
     settings = clean_document(await db.settings.find_one({"id": "platform"})) or {}
     return {
         "founders": profiles,
@@ -574,13 +608,16 @@ async def public_bootstrap() -> dict[str, Any]:
 
 @api.get("/seller/dashboard")
 async def seller_dashboard(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
-    profile = clean_document(await db.profiles.find_one({"owner_id": user["id"]}))
+    profile = moderation_view(await db.profiles.find_one({"owner_id": user["id"]}))
     counts = {}
     for name, (_, collection) in CONTENT_COLLECTIONS.items():
         counts[name] = {
             "total": await collection.count_documents({"owner_id": user["id"]}),
             "pending": await collection.count_documents(
-                {"owner_id": user["id"], "status": "pending"}
+                {
+                    "owner_id": user["id"],
+                    "$or": [{"status": "pending"}, {"review_status": "pending"}],
+                }
             ),
             "published": await collection.count_documents(
                 {"owner_id": user["id"], "status": "published"}
@@ -607,10 +644,24 @@ async def update_profile(
         "instagram": values.pop("instagram"),
         "whatsapp": values.pop("whatsapp"),
     }
-    values.update({"status": "pending", "verified": False, "updated_at": utcnow()})
-    await db.profiles.update_one({"id": existing["id"]}, {"$set": values})
+    now = utcnow()
+    if existing.get("status") == "published":
+        await db.profiles.update_one(
+            {"id": existing["id"]},
+            {
+                "$set": {
+                    "pending_changes": values,
+                    "review_status": "pending",
+                    "moderation_note": "",
+                    "updated_at": now,
+                }
+            },
+        )
+    else:
+        values.update({"status": "pending", "verified": False, "updated_at": now})
+        await db.profiles.update_one({"id": existing["id"]}, {"$set": values})
     await audit(user, "submit_profile", "profile", existing["id"])
-    return clean_document(await db.profiles.find_one({"id": existing["id"]}))
+    return moderation_view(await db.profiles.find_one({"id": existing["id"]}))
 
 
 @api.get("/seller/content/{content_type}")
@@ -619,7 +670,7 @@ async def list_seller_content(
 ) -> list[dict[str, Any]]:
     _, collection = content_collection(content_type)
     return [
-        clean_document(item)
+        moderation_view(item)
         async for item in collection.find({"owner_id": user["id"]}).sort(
             "updated_at", DESCENDING
         )
@@ -665,14 +716,33 @@ async def update_seller_content(
     user: dict[str, Any] = Depends(active_seller),
 ) -> dict[str, Any]:
     singular, collection = content_collection(content_type)
-    existing = await collection.find_one({"id": item_id, "owner_id": user["id"]})
-    if not existing and user["role"] != "super_admin":
+    query = {"id": item_id}
+    if user["role"] != "super_admin":
+        query["owner_id"] = user["id"]
+    existing = await collection.find_one(query)
+    if not existing:
         raise HTTPException(status_code=404, detail="Content not found")
     values = payload.model_dump()
-    values.update({"status": "pending", "moderation_note": "", "updated_at": utcnow()})
-    await collection.update_one({"id": item_id}, {"$set": values})
+    if content_type == "posts":
+        values["title"] = values["title"] or values["name"]
+    now = utcnow()
+    if existing.get("status") == "published":
+        await collection.update_one(
+            {"id": item_id},
+            {
+                "$set": {
+                    "pending_changes": values,
+                    "review_status": "pending",
+                    "moderation_note": "",
+                    "updated_at": now,
+                }
+            },
+        )
+    else:
+        values.update({"status": "pending", "moderation_note": "", "updated_at": now})
+        await collection.update_one({"id": item_id}, {"$set": values})
     await audit(user, f"update_{singular}", singular, item_id)
-    return clean_document(await collection.find_one({"id": item_id}))
+    return moderation_view(await collection.find_one({"id": item_id}))
 
 
 @api.delete("/seller/content/{content_type}/{item_id}", status_code=204)
@@ -703,6 +773,13 @@ async def upload_image(
     contents = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(contents) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="Image must be 5MB or smaller")
+    try:
+        with Image.open(io.BytesIO(contents)) as image:
+            image.verify()
+            if image.format != ALLOWED_IMAGE_FORMATS[file.content_type or ""]:
+                raise HTTPException(status_code=415, detail="Image content does not match its type")
+    except (UnidentifiedImageError, OSError, ValueError) as exc:
+        raise HTTPException(status_code=415, detail="The uploaded file is not a valid image") from exc
     digest = hashlib.sha256(contents).hexdigest()[:24]
     filename = f"{user['id']}-{digest}{extension}"
     destination = (UPLOAD_DIR / filename).resolve()
@@ -753,12 +830,16 @@ async def admin_overview(
         "content": {
             name: {
                 "total": await collection.count_documents({}),
-                "pending": await collection.count_documents({"status": "pending"}),
+                "pending": await collection.count_documents(
+                    {"$or": [{"status": "pending"}, {"review_status": "pending"}]}
+                ),
                 "published": await collection.count_documents({"status": "published"}),
             }
             for name, (_, collection) in CONTENT_COLLECTIONS.items()
         },
-        "pending_profiles": await db.profiles.count_documents({"status": "pending"}),
+        "pending_profiles": await db.profiles.count_documents(
+            {"$or": [{"status": "pending"}, {"review_status": "pending"}]}
+        ),
         "inquiries": await db.inquiries.count_documents({}),
     }
 
@@ -768,7 +849,7 @@ async def admin_users(
     user: dict[str, Any] = Depends(super_admin),
 ) -> list[dict[str, Any]]:
     return [
-        clean_document(item)
+        moderation_view(item)
         async for item in db.users.find({}).sort("created_at", DESCENDING)
     ]
 
@@ -819,7 +900,7 @@ async def admin_content(
 ) -> list[dict[str, Any]]:
     _, collection = admin_collection(content_type)
     return [
-        clean_document(item)
+        moderation_view(item)
         async for item in collection.find({}).sort("updated_at", DESCENDING)
     ]
 
@@ -834,28 +915,46 @@ async def moderate_content(
     singular, collection = admin_collection(content_type)
     if payload.status not in {"published", "rejected"}:
         raise HTTPException(status_code=422, detail="Invalid content status")
-    result = await collection.update_one(
-        {"id": item_id},
-        {
-            "$set": {
-                "status": payload.status,
-                "moderation_note": payload.note,
-                "updated_at": utcnow(),
-                "published_at": utcnow() if payload.status == "published" else None,
-            }
-        },
-    )
-    if not result.matched_count:
+    existing = await collection.find_one({"id": item_id})
+    if not existing:
         raise HTTPException(status_code=404, detail="Content not found")
-    if content_type == "profiles":
-        await collection.update_one(
-            {"id": item_id},
-            {"$set": {"verified": payload.status == "published"}},
-        )
+    now = utcnow()
+    pending_changes = existing.get("pending_changes")
+    if pending_changes:
+        if payload.status == "published":
+            approved = {
+                **pending_changes,
+                "status": "published",
+                "moderation_note": payload.note,
+                "updated_at": now,
+                "published_at": now,
+            }
+            if content_type == "profiles":
+                approved["verified"] = True
+            update = {
+                "$set": approved,
+                "$unset": {"pending_changes": "", "review_status": ""},
+            }
+        else:
+            update = {
+                "$set": {"moderation_note": payload.note, "updated_at": now},
+                "$unset": {"pending_changes": "", "review_status": ""},
+            }
+    else:
+        values = {
+            "status": payload.status,
+            "moderation_note": payload.note,
+            "updated_at": now,
+            "published_at": now if payload.status == "published" else None,
+        }
+        if content_type == "profiles":
+            values["verified"] = payload.status == "published"
+        update = {"$set": values}
+    await collection.update_one({"id": item_id}, update)
     await audit(
         actor, f"{payload.status}_{singular}", singular, item_id, {"note": payload.note}
     )
-    return clean_document(await collection.find_one({"id": item_id}))
+    return moderation_view(await collection.find_one({"id": item_id}))
 
 
 @api.get("/admin/inquiries")

@@ -4,6 +4,7 @@ import { GraduationCap, Calendar, Users, BookOpen, ArrowRight, Video, Award, Lig
 import SectionHeading from "@/components/shared/SectionHeading";
 import PageTransition from "@/components/layout/PageTransition";
 import { usePublicData } from "@/contexts/PublicDataContext";
+import { formatDisplayDate } from "@/lib/utils";
 
 const learningPaths = [
   { icon: Target, title: "Business Basics", desc: "Pricing, accounting, legal compliance, and getting started.", count: "8 resources" },
@@ -15,26 +16,28 @@ const learningPaths = [
 const communityEvents = [
   {
     title: "KED Monthly Meetup - Ahmedabad",
-    date: "Feb 28, 2026",
+    date: "Jul 30, 2026",
     type: "In-Person",
     description: "Network with 50+ women entrepreneurs. Share stories, find collaborators, and grow together.",
   },
   {
     title: "Seller Success Stories Live",
-    date: "Mar 5, 2026",
+    date: "Aug 6, 2026",
     type: "Online",
     description: "Hear from KED's top sellers about how they scaled their businesses on the platform.",
   },
   {
     title: "Kutch Craft Festival 2026",
-    date: "Mar 15-17, 2026",
+    date: "Aug 14-16, 2026",
     type: "In-Person",
     description: "KED's annual celebration of women artisans. Exhibition, workshops, and B2B connections.",
   },
 ];
 
 export default function CommunityPage() {
-  const { workshops } = usePublicData();
+  const { workshops, settings } = usePublicData();
+  const whatsapp = (settings.default_whatsapp || settings.support_phone || "+919876543210").replace(/\D/g, "");
+  const contactUrl = (message) => `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`;
   return (
     <PageTransition>
       <div className="pt-24 pb-20 lg:pb-12" data-testid="community-page">
@@ -71,18 +74,21 @@ export default function CommunityPage() {
                     </div>
                     <h3 className="font-sans text-sm font-medium text-ked-text mb-2 line-clamp-2">{ws.title}</h3>
                     <div className="flex items-center gap-2 text-xs font-sans text-ked-text-muted mb-3">
-                      <Calendar className="w-3.5 h-3.5" /> {ws.date} · {ws.time}
+                      <Calendar className="w-3.5 h-3.5" /> {formatDisplayDate(ws.date)} · {ws.time}
                     </div>
                     <div className="flex items-center justify-between pt-3 border-t border-ked-border">
                       <span className="font-sans text-sm font-semibold text-ked-text">
                         {ws.price === 0 ? "Free" : `₹${ws.price}`}
                       </span>
-                      <button
+                      <a
+                        href={contactUrl(`Hello KED, I would like to register for "${ws.title}" on ${formatDisplayDate(ws.date)}.`)}
+                        target="_blank"
+                        rel="noreferrer"
                         className="text-xs font-sans font-medium text-ked-primary hover:text-ked-primary-hover transition-colors"
                         data-testid={`register-ws-${ws.id}`}
                       >
                         Register Now
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </motion.div>
@@ -109,7 +115,7 @@ export default function CommunityPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className="flex gap-4 bg-[#FAF8F5] border border-ked-border rounded-2xl p-5 hover:-translate-y-1 hover:shadow-md transition-all duration-300 cursor-pointer"
+                    className="flex gap-4 bg-[#FAF8F5] border border-ked-border rounded-2xl p-5 hover:-translate-y-1 hover:shadow-md transition-all duration-300"
                   >
                     <div className="w-12 h-12 rounded-xl bg-ked-accent flex items-center justify-center flex-shrink-0">
                       <Icon className="w-6 h-6 text-ked-primary" />
@@ -149,12 +155,15 @@ export default function CommunityPage() {
                     <p className="font-sans text-xs text-ked-text-muted mt-0.5">{event.date}</p>
                     <p className="font-sans text-xs text-ked-text-body mt-1">{event.description}</p>
                   </div>
-                  <button
+                  <a
+                    href={contactUrl(`Hello KED, I would like to RSVP for "${event.title}" on ${event.date}.`)}
+                    target="_blank"
+                    rel="noreferrer"
                     className="text-sm font-sans font-medium text-ked-primary hover:text-ked-primary-hover transition-colors whitespace-nowrap"
                     data-testid={`rsvp-event-${i}`}
                   >
                     RSVP
-                  </button>
+                  </a>
                 </motion.div>
               ))}
             </div>
@@ -170,12 +179,15 @@ export default function CommunityPage() {
               <p className="font-sans text-sm text-ked-text-muted mb-6 max-w-lg mx-auto">
                 Get matched with experienced women entrepreneurs who will guide you through the challenges of building your business. Free for all KED members.
               </p>
-              <button
+              <a
+                href={contactUrl("Hello KED, I would like to apply for the KED Mentorship Program.")}
+                target="_blank"
+                rel="noreferrer"
                 className="bg-ked-primary text-white rounded-full px-8 py-3 font-sans font-medium hover:bg-ked-primary-hover transition-all"
                 data-testid="mentorship-cta"
               >
                 Apply for Mentorship
-              </button>
+              </a>
             </div>
           </div>
         </section>

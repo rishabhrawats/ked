@@ -75,6 +75,7 @@ export default function DashboardPage() {
   const [items, setItems] = useState([]);
   const [users, setUsers] = useState([]);
   const [inquiries, setInquiries] = useState([]);
+  const [platformSettings, setPlatformSettings] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [form, setForm] = useState(emptyContent);
   const [editingId, setEditingId] = useState(null);
@@ -90,6 +91,7 @@ export default function DashboardPage() {
       if (tab === "overview") setOverview(await api("/admin/overview"));
       else if (tab === "users") setUsers(await api("/admin/users"));
       else if (tab === "inquiries") setInquiries(await api("/admin/inquiries"));
+      else if (tab === "settings") setPlatformSettings(await api("/admin/settings"));
       else setItems(await api(`/admin/content/${tab}`));
     } else {
       const summary = await api("/seller/dashboard");
@@ -116,6 +118,7 @@ export default function DashboardPage() {
             ["services", "Services", FileText],
             ["posts", "Community Posts", FileText],
             ["inquiries", "Inquiries", FileText],
+            ["settings", "Platform Settings", Settings],
             ["security", "Security", Settings],
           ]
         : [
@@ -325,6 +328,17 @@ export default function DashboardPage() {
                   <Row key={item.id} title={item.name} subtitle={`${item.phone} | ${item.entity_type}: ${item.entity_id}`} status={item.status} />
                 ))}
               </DataTable>
+            )}
+
+            {isAdmin && tab === "settings" && platformSettings && (
+              <SettingsPanel
+                settings={platformSettings}
+                onSaved={async (message) => {
+                  setSuccess(message);
+                  await Promise.all([load(), refreshPublic()]);
+                }}
+                onError={(message) => setError(message)}
+              />
             )}
 
             {!isAdmin && tab === "inquiries" && (
@@ -570,6 +584,49 @@ function SecurityPanel({ onSuccess, onError }) {
       <Field label="Confirm new password" type="password" value={confirmPassword} onChange={setConfirmPassword} required />
       <button disabled={saving} className="rounded-full bg-ked-primary px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50">
         {saving ? "Updating..." : "Change password"}
+      </button>
+    </form>
+  );
+}
+
+function SettingsPanel({ settings, onSaved, onError }) {
+  const [values, setValues] = useState({
+    support_email: settings.support_email || "",
+    support_phone: settings.support_phone || "",
+    default_whatsapp: settings.default_whatsapp || "",
+    announcement: settings.announcement || "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    try {
+      await api("/admin/settings", { method: "PUT", body: values });
+      await onSaved("Platform settings updated.");
+    } catch (err) {
+      onError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="max-w-2xl space-y-4">
+      <p className="text-sm text-ked-text-muted">
+        Manage the platform contact details and public announcement message.
+      </p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Support email" type="email" value={values.support_email} onChange={(value) => setValues({ ...values, support_email: value })} required />
+        <Field label="Support phone" value={values.support_phone} onChange={(value) => setValues({ ...values, support_phone: value })} required />
+        <Field label="Default WhatsApp" value={values.default_whatsapp} onChange={(value) => setValues({ ...values, default_whatsapp: value })} required />
+      </div>
+      <label className="block text-sm font-medium text-ked-text">
+        Public announcement
+        <textarea rows={3} maxLength={300} value={values.announcement} onChange={(event) => setValues({ ...values, announcement: event.target.value })} className="mt-1.5 w-full rounded-xl border border-ked-border bg-[#FAF8F5] px-4 py-3 font-normal outline-none focus:ring-2 focus:ring-ked-primary/30" />
+      </label>
+      <button disabled={saving} className="rounded-full bg-ked-primary px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50">
+        {saving ? "Saving..." : "Save platform settings"}
       </button>
     </form>
   );

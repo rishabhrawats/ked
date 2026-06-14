@@ -45,10 +45,10 @@ SERVICES = [
 ]
 
 WORKSHOPS = [
-    ("w1", "Digital Marketing Essentials for Women Entrepreneurs", "Kavita Mehta", "2026-02-15", "10:00 AM - 1:00 PM", 1499),
-    ("w2", "Pricing Your Products Right: A KED Masterclass", "KED Business Team", "2026-02-22", "2:00 PM - 4:30 PM", 999),
-    ("w3", "GST & Compliance Made Simple", "CA Sunita Agarwal", "2026-03-01", "11:00 AM - 1:00 PM", 0),
-    ("w4", "Product Photography with Your Phone", "Radha Sharma", "2026-03-08", "3:00 PM - 5:00 PM", 799),
+    ("w1", "Digital Marketing Essentials for Women Entrepreneurs", "Kavita Mehta", "2026-07-18", "10:00 AM - 1:00 PM", 1499),
+    ("w2", "Pricing Your Products Right: A KED Masterclass", "KED Business Team", "2026-07-25", "2:00 PM - 4:30 PM", 999),
+    ("w3", "GST & Compliance Made Simple", "CA Sunita Agarwal", "2026-08-01", "11:00 AM - 1:00 PM", 0),
+    ("w4", "Product Photography with Your Phone", "Radha Sharma", "2026-08-08", "3:00 PM - 5:00 PM", 799),
 ]
 
 

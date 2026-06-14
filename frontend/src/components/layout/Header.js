@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search, User, Globe } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
@@ -14,16 +14,8 @@ const navLinks = [
   { label: "About", path: "/about" },
 ];
 
-const languages = [
-  { code: "en", label: "English" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "gu", label: "ગુજરાતી" },
-];
-
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("en");
   const location = useLocation();
   const { user } = useAuth();
 
@@ -67,45 +59,6 @@ export default function Header() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
-            {/* Language Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setLangOpen(!langOpen)}
-                className="p-2 rounded-full hover:bg-ked-accent/50 transition-colors"
-                data-testid="language-toggle"
-              >
-                <Globe className="w-5 h-5 text-ked-text-muted" />
-              </button>
-              <AnimatePresence>
-                {langOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    className="absolute right-0 mt-2 w-36 bg-white rounded-2xl shadow-lg border border-ked-border overflow-hidden"
-                  >
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => { setCurrentLang(lang.code); setLangOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm font-sans transition-colors ${
-                          currentLang === lang.code
-                            ? "bg-ked-accent text-ked-text font-medium"
-                            : "text-ked-text-muted hover:bg-ked-surface"
-                        }`}
-                        data-testid={`lang-${lang.code}`}
-                      >
-                        {lang.label}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <button className="hidden md:flex p-2 rounded-full hover:bg-ked-accent/50 transition-colors" data-testid="search-button">
-              <Search className="w-5 h-5 text-ked-text-muted" />
-            </button>
             <Link
               to={user ? "/dashboard" : "/auth"}
               className="hidden md:flex items-center gap-2 bg-ked-primary text-white rounded-full px-5 py-2 text-sm font-sans font-medium hover:bg-ked-primary-hover transition-colors"

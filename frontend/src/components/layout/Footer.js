@@ -1,9 +1,20 @@
 import { Link } from "react-router-dom";
-import { Heart, Instagram, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import { Heart, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import { usePublicData } from "@/contexts/PublicDataContext";
 
 export default function Footer() {
+  const { settings } = usePublicData();
+  const supportEmail = settings.support_email || "hello@ked.in";
+  const supportPhone = settings.support_phone || "+91 98765 43210";
+  const whatsapp = (settings.default_whatsapp || supportPhone).replace(/[^\d+]/g, "");
+
   return (
     <footer className="bg-[#2C2A29] text-white/80" data-testid="main-footer">
+      {settings.announcement && (
+        <div className="border-b border-white/10 bg-ked-primary px-4 py-3 text-center font-sans text-sm font-medium text-white" data-testid="public-announcement">
+          {settings.announcement}
+        </div>
+      )}
       {/* CTA Section */}
       <div className="ked-container py-20 md:py-28">
         <div className="text-center max-w-3xl mx-auto">
@@ -42,13 +53,10 @@ export default function Footer() {
                 India's First Platform To Empower Women Entrepreneurs With Structured Growth
               </p>
               <div className="flex items-center gap-3">
-                <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors" data-testid="footer-instagram">
-                  <Instagram className="w-4 h-4" />
-                </a>
-                <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors" data-testid="footer-email">
+                <a href={`mailto:${supportEmail}`} aria-label="Email KED support" className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors" data-testid="footer-email">
                   <Mail className="w-4 h-4" />
                 </a>
-                <a href="#" className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors" data-testid="footer-phone">
+                <a href={`https://wa.me/${whatsapp.replace("+", "")}`} aria-label="Contact KED on WhatsApp" className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors" data-testid="footer-phone">
                   <Phone className="w-4 h-4" />
                 </a>
               </div>
@@ -80,12 +88,12 @@ export default function Footer() {
                 <span className="font-sans text-sm text-white/60 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-ked-primary" /> Bhuj, Kutch, Gujarat
                 </span>
-                <span className="font-sans text-sm text-white/60 flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-ked-primary" /> hello@ked.in
-                </span>
-                <span className="font-sans text-sm text-white/60 flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-ked-primary" /> +91 98765 43210
-                </span>
+                <a href={`mailto:${supportEmail}`} className="font-sans text-sm text-white/60 hover:text-white flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-ked-primary" /> {supportEmail}
+                </a>
+                <a href={`tel:${supportPhone.replace(/[^\d+]/g, "")}`} className="font-sans text-sm text-white/60 hover:text-white flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-ked-primary" /> {supportPhone}
+                </a>
               </div>
             </div>
           </div>
@@ -98,11 +106,6 @@ export default function Footer() {
           <p className="font-sans text-xs text-white/40">
             2026 Kutch Entrepreneur Divas. Built with <Heart className="w-3 h-3 inline text-ked-primary" /> for women entrepreneurs.
           </p>
-          <div className="flex items-center gap-6">
-            <a href="#" className="font-sans text-xs text-white/40 hover:text-white/60 transition-colors">Privacy</a>
-            <a href="#" className="font-sans text-xs text-white/40 hover:text-white/60 transition-colors">Terms</a>
-            <a href="#" className="font-sans text-xs text-white/40 hover:text-white/60 transition-colors">Refund Policy</a>
-          </div>
         </div>
       </div>
     </footer>

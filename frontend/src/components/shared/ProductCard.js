@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Star, BadgeCheck } from "lucide-react";
+import { Star, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ProductCard({ product, index = 0 }) {
@@ -35,23 +35,6 @@ export default function ProductCard({ product, index = 0 }) {
                 {discount}% off
               </span>
             )}
-          </div>
-          {/* Quick Actions */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              className="p-2 bg-white/90 backdrop-blur rounded-full hover:bg-white transition-colors shadow-sm"
-              data-testid={`wishlist-${product.id}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              <Heart className="w-4 h-4 text-ked-text-muted" />
-            </button>
-            <button
-              className="p-2 bg-white/90 backdrop-blur rounded-full hover:bg-white transition-colors shadow-sm"
-              data-testid={`add-cart-${product.id}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              <MessageCircle className="w-4 h-4 text-ked-text-muted" />
-            </button>
           </div>
           {/* Verified Badge */}
           {product.verified && (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Star, Heart, MessageCircle, BadgeCheck, MapPin, Shield } from "lucide-react";
+import { ArrowLeft, Star, MessageCircle, BadgeCheck, MapPin, Shield } from "lucide-react";
 import { TrustBadge } from "@/components/shared/TrustBadge";
 import ProductCard from "@/components/shared/ProductCard";
 import PageTransition from "@/components/layout/PageTransition";
@@ -57,9 +57,6 @@ export default function ProductDetailPage() {
                   <span className="bg-[#2C2A29] text-white text-xs px-3 py-1 rounded-full font-sans font-medium">{discount}% Off</span>
                 )}
               </div>
-              <button className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur rounded-full shadow-sm hover:bg-white transition-colors" data-testid="product-wishlist">
-                <Heart className="w-5 h-5 text-ked-text-muted" />
-              </button>
             </motion.div>
 
             {/* Details */}

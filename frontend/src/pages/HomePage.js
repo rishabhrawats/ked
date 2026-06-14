@@ -9,6 +9,7 @@ import { TrustStrip } from "@/components/shared/TrustBadge";
 import { trustStats, howItWorks, testimonials, IMAGES, spotlightStories as fallbackStories } from "@/data/mockData";
 import PageTransition from "@/components/layout/PageTransition";
 import { usePublicData } from "@/contexts/PublicDataContext";
+import { formatDisplayDate } from "@/lib/utils";
 
 function HeroSection() {
   return (
@@ -337,7 +338,7 @@ function WorkshopsSection({ workshops }) {
               <h4 className="font-sans text-sm font-medium text-ked-text mb-3 line-clamp-2">{ws.title}</h4>
               <div className="flex items-center gap-2 text-xs font-sans text-ked-text-muted mb-3">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>{ws.date}</span>
+                <span>{formatDisplayDate(ws.date)}</span>
               </div>
               <div className="flex items-center justify-between pt-3 border-t border-ked-border">
                 <span className="font-sans text-sm font-semibold text-ked-text">
@@ -542,7 +543,7 @@ function DailyHighlightsSection({ founders, products, workshops }) {
                   <Calendar className="w-8 h-8 text-ked-primary flex-shrink-0" />
                   <div>
                     <p className="text-xs font-sans font-medium text-ked-text line-clamp-1">{ws.title}</p>
-                    <p className="text-[10px] font-sans text-ked-text-muted">{ws.date}</p>
+                    <p className="text-[10px] font-sans text-ked-text-muted">{formatDisplayDate(ws.date)}</p>
                   </div>
                 </Link>
               ))}

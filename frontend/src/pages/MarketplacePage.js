@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, SlidersHorizontal, Grid3X3, LayoutList } from "lucide-react";
+import { Search } from "lucide-react";
 import ProductCard from "@/components/shared/ProductCard";
 import SectionHeading from "@/components/shared/SectionHeading";
 import PageTransition from "@/components/layout/PageTransition";
@@ -41,9 +41,6 @@ export default function MarketplacePage() {
                 data-testid="marketplace-search"
               />
             </div>
-            <button className="flex items-center gap-2 px-5 py-3 border border-ked-border rounded-xl font-sans text-sm text-ked-text-muted hover:bg-ked-surface transition-colors" data-testid="marketplace-sort">
-              <SlidersHorizontal className="w-4 h-4" /> Filters
-            </button>
           </div>
 
           {/* Category Chips */}

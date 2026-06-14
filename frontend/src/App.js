@@ -13,7 +13,6 @@ import ServiceDetailPage from "@/pages/ServiceDetailPage";
 import CommunityPage from "@/pages/CommunityPage";
 import SpotlightPage from "@/pages/SpotlightPage";
 import BulkOrdersPage from "@/pages/BulkOrdersPage";
-import SellerOnboardingPage from "@/pages/SellerOnboardingPage";
 import AboutPage from "@/pages/AboutPage";
 import AuthPage from "@/pages/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -43,7 +42,7 @@ function AppRoutes() {
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/spotlight" element={<SpotlightPage />} />
         <Route path="/bulk-orders" element={<BulkOrdersPage />} />
-        <Route path="/seller-onboarding" element={<SellerOnboardingPage />} />
+        <Route path="/seller-onboarding" element={<Navigate to="/auth?mode=register" replace />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route

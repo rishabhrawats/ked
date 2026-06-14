@@ -49,3 +49,31 @@ def test_content_collection_rejects_unknown_type():
     with pytest.raises(server.HTTPException) as exc:
         server.content_collection("orders")
     assert exc.value.status_code == 404
+
+
+def test_pending_changes_are_hidden_from_public_output():
+    document = {
+        "id": "product_test",
+        "status": "published",
+        "name": "Live name",
+        "pending_changes": {"name": "Pending name"},
+        "review_status": "pending",
+    }
+    output = server.public_document(document)
+    assert output["name"] == "Live name"
+    assert "pending_changes" not in output
+    assert "review_status" not in output
+
+
+def test_moderation_view_exposes_pending_edit_without_changing_live_status():
+    document = {
+        "id": "product_test",
+        "status": "published",
+        "name": "Live name",
+        "pending_changes": {"name": "Pending name"},
+        "review_status": "pending",
+    }
+    output = server.moderation_view(document)
+    assert output["name"] == "Pending name"
+    assert output["status"] == "pending"
+    assert output["published_status"] == "published"

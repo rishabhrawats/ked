@@ -85,6 +85,7 @@ export default function DashboardPage() {
 
   const load = useCallback(async () => {
     setError("");
+    if (tab === "security") return;
     if (isAdmin) {
       if (tab === "overview") setOverview(await api("/admin/overview"));
       else if (tab === "users") setUsers(await api("/admin/users"));
@@ -115,6 +116,7 @@ export default function DashboardPage() {
             ["services", "Services", FileText],
             ["posts", "Community Posts", FileText],
             ["inquiries", "Inquiries", FileText],
+            ["security", "Security", Settings],
           ]
         : [
             ["profile", "Business Profile", ShieldCheck],
@@ -122,6 +124,7 @@ export default function DashboardPage() {
             ["services", "My Services", FileText],
             ["posts", "My Posts", FileText],
             ["inquiries", "My Inquiries", FileText],
+            ["security", "Security", Settings],
           ],
     [isAdmin],
   );
@@ -344,6 +347,13 @@ export default function DashboardPage() {
               />
             )}
 
+            {tab === "security" && (
+              <SecurityPanel
+                onSuccess={(message) => setSuccess(message)}
+                onError={(message) => setError(message)}
+              />
+            )}
+
             {!isAdmin && ["products", "services", "posts"].includes(tab) && !showForm && (
               <DataTable>
                 {items.map((item) => (
@@ -515,6 +525,51 @@ function ProfileEditor({ profile, disabled, onSaved, onError }) {
       {values.image && <img src={values.image} alt="Profile preview" className="h-32 w-32 rounded-xl object-cover" />}
       <button disabled={disabled || saving} className="rounded-full bg-ked-primary px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50">
         {saving ? "Saving..." : "Submit profile for approval"}
+      </button>
+    </form>
+  );
+}
+
+function SecurityPanel({ onSuccess, onError }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    if (newPassword !== confirmPassword) {
+      onError("New passwords do not match.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const result = await api("/auth/change-password", {
+        method: "POST",
+        body: {
+          current_password: currentPassword,
+          new_password: newPassword,
+        },
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      onSuccess(result.message);
+    } catch (err) {
+      onError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="max-w-lg space-y-4">
+      <p className="text-sm text-ked-text-muted">Use at least 10 characters with letters and numbers.</p>
+      <Field label="Current password" type="password" value={currentPassword} onChange={setCurrentPassword} required />
+      <Field label="New password" type="password" value={newPassword} onChange={setNewPassword} required />
+      <Field label="Confirm new password" type="password" value={confirmPassword} onChange={setConfirmPassword} required />
+      <button disabled={saving} className="rounded-full bg-ked-primary px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50">
+        {saving ? "Updating..." : "Change password"}
       </button>
     </form>
   );

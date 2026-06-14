@@ -278,6 +278,20 @@ class ResetPasswordInput(BaseModel):
     password: str = Field(min_length=10, max_length=128)
 
 
+class ChangePasswordInput(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=10, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value: str) -> str:
+        if not any(char.isalpha() for char in value) or not any(
+            char.isdigit() for char in value
+        ):
+            raise ValueError("Password must contain letters and numbers")
+        return value
+
+
 class ProfileInput(BaseModel):
     name: str = Field(min_length=2, max_length=100)
     business: str = Field(min_length=2, max_length=120)
@@ -494,6 +508,28 @@ async def reset_password(payload: ResetPasswordInput) -> dict[str, str]:
         },
     )
     return {"message": "Password updated"}
+
+
+@api.post("/auth/change-password")
+async def change_password(
+    payload: ChangePasswordInput,
+    user: dict[str, Any] = Depends(csrf_protected),
+) -> dict[str, str]:
+    if not verify_password(payload.current_password, user["password_hash"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if payload.current_password == payload.new_password:
+        raise HTTPException(status_code=400, detail="Choose a different password")
+    await db.users.update_one(
+        {"id": user["id"]},
+        {
+            "$set": {
+                "password_hash": hash_password(payload.new_password),
+                "updated_at": utcnow(),
+            }
+        },
+    )
+    await audit(user, "change_password", "user", user["id"])
+    return {"message": "Password changed successfully"}
 
 
 @api.get("/public/bootstrap")

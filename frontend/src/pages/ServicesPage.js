@@ -3,11 +3,12 @@ import { Search } from "lucide-react";
 import ServiceCard from "@/components/shared/ServiceCard";
 import SectionHeading from "@/components/shared/SectionHeading";
 import PageTransition from "@/components/layout/PageTransition";
-import { services } from "@/data/mockData";
+import { usePublicData } from "@/contexts/PublicDataContext";
 
 const serviceTypes = ["All", "Workshop", "Weekly Class", "Course", "Consultation"];
 
 export default function ServicesPage() {
+  const { services } = usePublicData();
   const [activeType, setActiveType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 

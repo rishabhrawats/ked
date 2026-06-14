@@ -4,9 +4,11 @@ import { Search, SlidersHorizontal, Grid3X3, LayoutList } from "lucide-react";
 import ProductCard from "@/components/shared/ProductCard";
 import SectionHeading from "@/components/shared/SectionHeading";
 import PageTransition from "@/components/layout/PageTransition";
-import { products, categories } from "@/data/mockData";
+import { categories } from "@/data/mockData";
+import { usePublicData } from "@/contexts/PublicDataContext";
 
 export default function MarketplacePage() {
+  const { products } = usePublicData();
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 

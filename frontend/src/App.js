@@ -1,5 +1,5 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -16,6 +16,8 @@ import BulkOrdersPage from "@/pages/BulkOrdersPage";
 import SellerOnboardingPage from "@/pages/SellerOnboardingPage";
 import AboutPage from "@/pages/AboutPage";
 import AuthPage from "@/pages/AuthPage";
+import DashboardPage from "@/pages/DashboardPage";
+import { useAuth } from "@/contexts/AuthContext";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -27,6 +29,8 @@ function ScrollToTop() {
 
 function AppRoutes() {
   const location = useLocation();
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen" />;
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
@@ -42,6 +46,10 @@ function AppRoutes() {
         <Route path="/seller-onboarding" element={<SellerOnboardingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route
+          path="/dashboard"
+          element={user ? <DashboardPage /> : <Navigate to="/auth" replace />}
+        />
       </Routes>
     </AnimatePresence>
   );
@@ -49,7 +57,7 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={(import.meta.env.BASE_URL || "/").replace(/\/$/, "") || "/"}>
       <ScrollToTop />
       <div className="min-h-screen bg-[#FDFBF9]">
         <Header />

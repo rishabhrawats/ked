@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Heart, ShoppingBag, Star, BadgeCheck } from "lucide-react";
+import { Heart, MessageCircle, Star, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ProductCard({ product, index = 0 }) {
@@ -50,7 +50,7 @@ export default function ProductCard({ product, index = 0 }) {
               data-testid={`add-cart-${product.id}`}
               onClick={(e) => e.preventDefault()}
             >
-              <ShoppingBag className="w-4 h-4 text-ked-text-muted" />
+              <MessageCircle className="w-4 h-4 text-ked-text-muted" />
             </button>
           </div>
           {/* Verified Badge */}

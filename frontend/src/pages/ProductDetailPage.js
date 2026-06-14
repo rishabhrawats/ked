@@ -1,16 +1,25 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Star, Heart, ShoppingBag, BadgeCheck, MapPin, Truck, Shield, RotateCcw } from "lucide-react";
+import { ArrowLeft, Star, Heart, MessageCircle, BadgeCheck, MapPin, Shield } from "lucide-react";
 import { TrustBadge } from "@/components/shared/TrustBadge";
 import ProductCard from "@/components/shared/ProductCard";
 import PageTransition from "@/components/layout/PageTransition";
-import { products } from "@/data/mockData";
+import { usePublicData } from "@/contexts/PublicDataContext";
+import InquiryDialog from "@/components/shared/InquiryDialog";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const product = products.find((p) => p.id === id) || products[0];
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const { products } = usePublicData();
+  const product = products.find((p) => p.id === id);
+  if (!product) {
+    return <div className="min-h-screen pt-32 text-center font-serif text-2xl">Product not found</div>;
+  }
   const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
-  const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  const discount = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
 
   return (
     <PageTransition>
@@ -112,32 +121,19 @@ export default function ProductDetailPage() {
               {/* Actions */}
               <div className="flex gap-4 mb-8">
                 <button
+                  onClick={() => setInquiryOpen(true)}
                   className="flex-1 flex items-center justify-center gap-2 bg-ked-primary text-white rounded-full py-3.5 font-sans font-medium hover:bg-ked-primary-hover transition-all"
-                  data-testid="add-to-cart-btn"
+                  data-testid="product-inquiry-btn"
                 >
-                  <ShoppingBag className="w-5 h-5" /> Add to Cart
-                </button>
-                <button
-                  className="flex items-center justify-center gap-2 border border-ked-border text-ked-text rounded-full px-6 py-3.5 font-sans font-medium hover:bg-ked-surface transition-all"
-                  data-testid="buy-now-btn"
-                >
-                  Buy Now
+                  <MessageCircle className="w-5 h-5" /> Inquire on WhatsApp
                 </button>
               </div>
 
               {/* Trust Indicators */}
               <div className="grid grid-cols-2 gap-4 p-5 bg-[#FAF8F5] border border-ked-border rounded-2xl">
                 <div className="flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-ked-primary" />
-                  <span className="text-xs font-sans text-ked-text-muted">Free shipping over ₹999</span>
-                </div>
-                <div className="flex items-center gap-2">
                   <Shield className="w-5 h-5 text-ked-primary" />
                   <span className="text-xs font-sans text-ked-text-muted">KED Verified Seller</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RotateCcw className="w-5 h-5 text-ked-primary" />
-                  <span className="text-xs font-sans text-ked-text-muted">Easy returns in 7 days</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-ked-primary" />
@@ -160,6 +156,7 @@ export default function ProductDetailPage() {
           )}
         </div>
       </div>
+      <InquiryDialog entityType="product" entityId={product.id} title={product.name} open={inquiryOpen} onClose={() => setInquiryOpen(false)} />
     </PageTransition>
   );
 }

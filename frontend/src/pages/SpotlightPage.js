@@ -3,9 +3,12 @@ import { motion } from "framer-motion";
 import { Clock, ArrowRight } from "lucide-react";
 import SectionHeading from "@/components/shared/SectionHeading";
 import PageTransition from "@/components/layout/PageTransition";
-import { spotlightStories, founders } from "@/data/mockData";
+import { usePublicData } from "@/contexts/PublicDataContext";
+import { spotlightStories as fallbackStories } from "@/data/mockData";
 
 export default function SpotlightPage() {
+  const { posts, founders } = usePublicData();
+  const spotlightStories = posts.length ? posts : fallbackStories;
   return (
     <PageTransition>
       <div className="pt-24 pb-20 lg:pb-12" data-testid="spotlight-page">

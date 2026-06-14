@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { GraduationCap, Calendar, Users, BookOpen, ArrowRight, Video, Award, Lightbulb, Target, TrendingUp } from "lucide-react";
 import SectionHeading from "@/components/shared/SectionHeading";
 import PageTransition from "@/components/layout/PageTransition";
-import { workshops } from "@/data/mockData";
+import { usePublicData } from "@/contexts/PublicDataContext";
 
 const learningPaths = [
   { icon: Target, title: "Business Basics", desc: "Pricing, accounting, legal compliance, and getting started.", count: "8 resources" },
@@ -34,6 +34,7 @@ const communityEvents = [
 ];
 
 export default function CommunityPage() {
+  const { workshops } = usePublicData();
   return (
     <PageTransition>
       <div className="pt-24 pb-20 lg:pb-12" data-testid="community-page">

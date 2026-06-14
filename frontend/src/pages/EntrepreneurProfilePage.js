@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin, Star, BadgeCheck, Instagram, Phone, MessageCircle, ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
@@ -5,13 +6,19 @@ import ProductCard from "@/components/shared/ProductCard";
 import ServiceCard from "@/components/shared/ServiceCard";
 import { TrustBadge } from "@/components/shared/TrustBadge";
 import PageTransition from "@/components/layout/PageTransition";
-import { founders, products, services } from "@/data/mockData";
+import { usePublicData } from "@/contexts/PublicDataContext";
+import InquiryDialog from "@/components/shared/InquiryDialog";
 
 export default function EntrepreneurProfilePage() {
   const { id } = useParams();
-  const founder = founders.find((f) => f.id === id) || founders[0];
-  const founderProducts = products.filter((p) => p.seller.id === founder.id);
-  const founderServices = services.filter((s) => s.provider.id === founder.id);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const { founders, products, services } = usePublicData();
+  const founder = founders.find((f) => f.id === id);
+  if (!founder) {
+    return <div className="min-h-screen pt-32 text-center font-serif text-2xl">Seller not found</div>;
+  }
+  const founderProducts = products.filter((p) => p.seller?.id === founder.id);
+  const founderServices = services.filter((s) => s.provider?.id === founder.id);
 
   return (
     <PageTransition>
@@ -68,12 +75,14 @@ export default function EntrepreneurProfilePage() {
               {/* Actions */}
               <div className="flex flex-wrap gap-3 md:flex-col">
                 <button
+                  onClick={() => setInquiryOpen(true)}
                   className="flex items-center gap-2 bg-ked-primary text-white rounded-full px-6 py-2.5 font-sans text-sm font-medium hover:bg-ked-primary-hover transition-all"
                   data-testid="profile-inquiry-btn"
                 >
                   <MessageCircle className="w-4 h-4" /> Inquire
                 </button>
                 <button
+                  onClick={() => setInquiryOpen(true)}
                   className="flex items-center gap-2 border border-ked-border text-ked-text rounded-full px-6 py-2.5 font-sans text-sm font-medium hover:bg-ked-surface transition-all"
                   data-testid="profile-whatsapp-btn"
                 >
@@ -136,6 +145,7 @@ export default function EntrepreneurProfilePage() {
           </Link>
         </div>
       </div>
+      <InquiryDialog entityType="profile" entityId={founder.id} title={founder.business} open={inquiryOpen} onClose={() => setInquiryOpen(false)} />
     </PageTransition>
   );
 }

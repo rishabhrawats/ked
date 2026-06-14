@@ -6,8 +6,9 @@ import ProductCard from "@/components/shared/ProductCard";
 import ServiceCard from "@/components/shared/ServiceCard";
 import FounderCard from "@/components/shared/FounderCard";
 import { TrustStrip } from "@/components/shared/TrustBadge";
-import { products, services, founders, spotlightStories, workshops, trustStats, howItWorks, testimonials, dailyHighlights, IMAGES } from "@/data/mockData";
+import { trustStats, howItWorks, testimonials, IMAGES, spotlightStories as fallbackStories } from "@/data/mockData";
 import PageTransition from "@/components/layout/PageTransition";
+import { usePublicData } from "@/contexts/PublicDataContext";
 
 function HeroSection() {
   return (
@@ -98,7 +99,7 @@ function HeroSection() {
   );
 }
 
-function FeaturedBusinessesSection() {
+function FeaturedBusinessesSection({ founders }) {
   return (
     <section className="ked-section" data-testid="featured-businesses-section">
       <div className="ked-container">
@@ -126,7 +127,7 @@ function FeaturedBusinessesSection() {
   );
 }
 
-function ProductsSection() {
+function ProductsSection({ products }) {
   return (
     <section className="ked-section bg-[#FAF8F5]" data-testid="products-section">
       <div className="ked-container">
@@ -154,7 +155,7 @@ function ProductsSection() {
   );
 }
 
-function ServicesSection() {
+function ServicesSection({ services }) {
   return (
     <section className="ked-section" data-testid="services-section">
       <div className="ked-container">
@@ -182,7 +183,7 @@ function ServicesSection() {
   );
 }
 
-function SpotlightSection() {
+function SpotlightSection({ spotlightStories }) {
   const featured = spotlightStories[0];
   return (
     <section className="ked-section bg-[#FAF8F5]" data-testid="spotlight-section">
@@ -305,7 +306,7 @@ function HowItWorksSection() {
   );
 }
 
-function WorkshopsSection() {
+function WorkshopsSection({ workshops }) {
   return (
     <section className="ked-section bg-[#FAF8F5]" data-testid="workshops-section">
       <div className="ked-container">
@@ -450,7 +451,13 @@ function TestimonialsSection() {
   );
 }
 
-function DailyHighlightsSection() {
+function DailyHighlightsSection({ founders, products, workshops }) {
+  const dailyHighlights = {
+    featuredBusiness: founders[2] || founders[0],
+    todaysOffers: products.slice(0, 3),
+    upcomingWorkshops: workshops.slice(0, 2),
+  };
+  if (!dailyHighlights.featuredBusiness) return null;
   return (
     <section className="ked-section" data-testid="daily-highlights-section">
       <div className="ked-container">
@@ -548,18 +555,20 @@ function DailyHighlightsSection() {
 }
 
 export default function HomePage() {
+  const { products, services, founders, posts, workshops } = usePublicData();
+  const spotlightStories = posts.length ? posts : fallbackStories;
   return (
     <PageTransition>
       <HeroSection />
       <TrustStrip />
-      <DailyHighlightsSection />
-      <FeaturedBusinessesSection />
-      <ProductsSection />
-      <ServicesSection />
-      <SpotlightSection />
+      <DailyHighlightsSection founders={founders} products={products} workshops={workshops} />
+      <FeaturedBusinessesSection founders={founders} />
+      <ProductsSection products={products} />
+      <ServicesSection services={services} />
+      <SpotlightSection spotlightStories={spotlightStories} />
       <HowItWorksSection />
       <WhyKEDSection />
-      <WorkshopsSection />
+      <WorkshopsSection workshops={workshops} />
       <TestimonialsSection />
     </PageTransition>
   );

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search, Heart, ShoppingBag, User, Globe } from "lucide-react";
+import { Menu, X, Search, User, Globe } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -24,6 +25,7 @@ export default function Header() {
   const [langOpen, setLangOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("en");
   const location = useLocation();
+  const { user } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 ked-glass" data-testid="main-header">
@@ -104,20 +106,13 @@ export default function Header() {
             <button className="hidden md:flex p-2 rounded-full hover:bg-ked-accent/50 transition-colors" data-testid="search-button">
               <Search className="w-5 h-5 text-ked-text-muted" />
             </button>
-            <button className="hidden md:flex p-2 rounded-full hover:bg-ked-accent/50 transition-colors" data-testid="wishlist-button">
-              <Heart className="w-5 h-5 text-ked-text-muted" />
-            </button>
-            <button className="hidden md:flex p-2 rounded-full hover:bg-ked-accent/50 transition-colors" data-testid="cart-button">
-              <ShoppingBag className="w-5 h-5 text-ked-text-muted" />
-            </button>
-
             <Link
-              to="/auth"
+              to={user ? "/dashboard" : "/auth"}
               className="hidden md:flex items-center gap-2 bg-ked-primary text-white rounded-full px-5 py-2 text-sm font-sans font-medium hover:bg-ked-primary-hover transition-colors"
               data-testid="auth-button"
             >
               <User className="w-4 h-4" />
-              Join KED
+              {user ? "Dashboard" : "Join KED"}
             </Link>
 
             {/* Mobile Menu Toggle */}
@@ -165,13 +160,13 @@ export default function Header() {
                 </motion.div>
               ))}
               <Link
-                to="/auth"
+                to={user ? "/dashboard" : "/auth"}
                 onClick={() => setIsOpen(false)}
                 className="mt-4 flex items-center justify-center gap-2 bg-ked-primary text-white rounded-full px-5 py-3 text-sm font-sans font-medium"
                 data-testid="mobile-auth-button"
               >
                 <User className="w-4 h-4" />
-                Join KED
+                {user ? "Dashboard" : "Join KED"}
               </Link>
             </nav>
           </motion.div>

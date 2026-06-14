@@ -1,13 +1,20 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Star, Clock, Video, MapPin, Calendar, Users, BadgeCheck, MessageCircle, Phone } from "lucide-react";
 import { TrustBadge } from "@/components/shared/TrustBadge";
 import PageTransition from "@/components/layout/PageTransition";
-import { services } from "@/data/mockData";
+import { usePublicData } from "@/contexts/PublicDataContext";
+import InquiryDialog from "@/components/shared/InquiryDialog";
 
 export default function ServiceDetailPage() {
   const { id } = useParams();
-  const service = services.find((s) => s.id === id) || services[0];
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const { services } = usePublicData();
+  const service = services.find((s) => s.id === id);
+  if (!service) {
+    return <div className="min-h-screen pt-32 text-center font-serif text-2xl">Service not found</div>;
+  }
 
   return (
     <PageTransition>
@@ -117,12 +124,14 @@ export default function ServiceDetailPage() {
                     <span className="text-sm font-sans text-ked-text-muted">{service.priceType}</span>
                   </div>
                   <button
+                    onClick={() => setInquiryOpen(true)}
                     className="w-full flex items-center justify-center gap-2 bg-ked-primary text-white rounded-full py-3.5 font-sans font-medium hover:bg-ked-primary-hover transition-all mb-3"
                     data-testid="book-now-btn"
                   >
-                    Book Now
+                    Inquire on WhatsApp
                   </button>
                   <button
+                    onClick={() => setInquiryOpen(true)}
                     className="w-full flex items-center justify-center gap-2 border border-ked-border text-ked-text rounded-full py-3 font-sans font-medium hover:bg-ked-surface transition-all"
                     data-testid="service-inquiry-btn"
                   >
@@ -159,6 +168,7 @@ export default function ServiceDetailPage() {
           </div>
         </div>
       </div>
+      <InquiryDialog entityType="service" entityId={service.id} title={service.name} open={inquiryOpen} onClose={() => setInquiryOpen(false)} />
     </PageTransition>
   );
 }

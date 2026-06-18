@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   CheckCircle,
+  ChevronDown,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -297,29 +298,44 @@ export default function DashboardPage() {
             )}
 
             {isAdmin && tab === "users" && (
-              <DataTable>
+              <div className="space-y-3">
                 {users.map((item) => (
-                  <Row key={item.id} title={item.name} subtitle={`${item.email} | ${item.role}`} status={item.status}>
-                    {item.role !== "super_admin" && (
-                      <>
-                        <Action onClick={() => moderate("users", item.id, "active")}>Approve</Action>
-                        <Action danger onClick={() => moderate("users", item.id, "suspended")}>Suspend</Action>
-                      </>
+                  <ReviewCard key={item.id} kind="users" item={item}>
+                    {item.role !== "super_admin" && item.status === "pending" && (
+                      <Action onClick={() => moderate("users", item.id, "active")}>Approve seller</Action>
                     )}
-                  </Row>
+                    {item.role !== "super_admin" && item.status !== "suspended" && (
+                      <Action danger onClick={() => moderate("users", item.id, "suspended")}>Suspend</Action>
+                    )}
+                    {item.role !== "super_admin" && item.status === "suspended" && (
+                      <Action onClick={() => moderate("users", item.id, "active")}>Reactivate</Action>
+                    )}
+                  </ReviewCard>
                 ))}
-              </DataTable>
+                {!users.length && <EmptyReviewState />}
+              </div>
             )}
 
             {isAdmin && ["profiles", "products", "services", "posts"].includes(tab) && (
-              <DataTable>
+              <div className="space-y-3">
                 {items.map((item) => (
-                  <Row key={item.id} title={item.title || item.name} subtitle={item.category} status={item.status}>
-                    <Action onClick={() => moderate(tab, item.id, "published")}>Publish</Action>
-                    <Action danger onClick={() => moderate(tab, item.id, "rejected")}>Reject</Action>
-                  </Row>
+                  <ReviewCard key={item.id} kind={tab} item={item}>
+                    {item.status === "pending" && (
+                      <>
+                        <Action onClick={() => moderate(tab, item.id, "published")}>Approve and publish</Action>
+                        <Action danger onClick={() => moderate(tab, item.id, "rejected")}>Reject request</Action>
+                      </>
+                    )}
+                    {item.status === "published" && (
+                      <Action danger onClick={() => moderate(tab, item.id, "rejected")}>Remove from public</Action>
+                    )}
+                    {item.status === "rejected" && (
+                      <Action onClick={() => moderate(tab, item.id, "published")}>Publish</Action>
+                    )}
+                  </ReviewCard>
                 ))}
-              </DataTable>
+                {!items.length && <EmptyReviewState />}
+              </div>
             )}
 
             {isAdmin && tab === "inquiries" && (
@@ -439,6 +455,178 @@ function Metric({ label, value }) {
 
 function DataTable({ children }) {
   return <div className="divide-y divide-ked-border overflow-hidden rounded-xl border border-ked-border">{children}</div>;
+}
+
+const reviewFields = {
+  users: [
+    ["Full name", "name"],
+    ["Email", "email"],
+    ["Phone", "phone"],
+    ["Role", "role"],
+    ["Business name", "profile.business"],
+    ["Business category", "profile.category"],
+    ["Location", "profile.location"],
+    ["Business description", "profile.story"],
+    ["WhatsApp", "profile.social.whatsapp"],
+    ["Instagram", "profile.social.instagram"],
+  ],
+  profiles: [
+    ["Founder name", "name"],
+    ["Business name", "business"],
+    ["Tagline", "tagline"],
+    ["Category", "category"],
+    ["Location", "location"],
+    ["Business story", "story"],
+    ["WhatsApp", "social.whatsapp"],
+    ["Instagram", "social.instagram"],
+  ],
+  products: [
+    ["Product name", "name"],
+    ["Category", "category"],
+    ["Description", "description"],
+    ["Price", "price", "currency"],
+    ["Original price", "originalPrice", "currency"],
+    ["Tags", "tags"],
+  ],
+  services: [
+    ["Service name", "name"],
+    ["Category", "category"],
+    ["Description", "description"],
+    ["Price", "price", "currency"],
+    ["Pricing type", "priceType"],
+    ["Service type", "type"],
+    ["Duration", "duration"],
+    ["Delivery", "isOnline", "online"],
+    ["Available slots", "slots"],
+    ["Tags", "tags"],
+  ],
+  posts: [
+    ["Post title", "title"],
+    ["Category", "category"],
+    ["Post content", "description"],
+    ["Tags", "tags"],
+  ],
+};
+
+function getPath(source, path) {
+  return path.split(".").reduce((value, key) => value?.[key], source);
+}
+
+function displayValue(value, format) {
+  if (value === null || value === undefined || value === "") return "Not provided";
+  if (format === "currency") return `INR ${Number(value).toLocaleString("en-IN")}`;
+  if (format === "online") return value ? "Online" : "Offline / in person";
+  if (Array.isArray(value)) return value.length ? value.join(", ") : "Not provided";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  return String(value);
+}
+
+function valuesDiffer(current, requested) {
+  return JSON.stringify(current ?? null) !== JSON.stringify(requested ?? null);
+}
+
+function ReviewCard({ kind, item, children }) {
+  const isUser = kind === "users";
+  const title = isUser ? item.name : item.title || item.name || item.business;
+  const submitter = isUser
+    ? item.profile?.business || item.email
+    : item.submitted_by?.business || item.submitted_by?.name || item.submitted_by?.email;
+  const image = isUser ? item.profile?.image : item.image || item.images?.[0];
+  const current = item.current_version;
+  const fields = reviewFields[kind] || [];
+  const submittedAt = item.updated_at || item.created_at;
+
+  return (
+    <details className="group overflow-hidden rounded-2xl border border-ked-border bg-white">
+      <summary className="flex cursor-pointer list-none items-center gap-3 p-4 hover:bg-[#FAF8F5]">
+        {image ? (
+          <img src={image} alt="" className="h-14 w-14 flex-none rounded-xl border border-ked-border object-cover" />
+        ) : (
+          <div className="flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-ked-accent">
+            {isUser ? <Users className="h-5 w-5 text-ked-primary" /> : <FileText className="h-5 w-5 text-ked-primary" />}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate text-sm font-semibold text-ked-text">{title}</p>
+            {item.review_type && (
+              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">
+                {item.review_type === "update" ? "Edit request" : "New submission"}
+              </span>
+            )}
+          </div>
+          <p className="truncate text-xs text-ked-text-muted">
+            {submitter || "KED seller"}
+            {submittedAt ? ` | Submitted ${new Date(submittedAt).toLocaleString("en-IN")}` : ""}
+          </p>
+        </div>
+        <StatusBadge status={item.status} />
+        <span className="hidden text-xs font-medium text-ked-primary sm:block">Review details</span>
+        <ChevronDown className="h-4 w-4 flex-none text-ked-text-muted transition-transform group-open:rotate-180" />
+      </summary>
+
+      <div className="border-t border-ked-border bg-[#FAF8F5] p-4 md:p-6">
+        {!isUser && item.submitted_by && (
+          <div className="mb-5 rounded-xl border border-ked-border bg-white p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-ked-text-muted">Submitted by</p>
+            <p className="mt-1 text-sm font-semibold text-ked-text">
+              {item.submitted_by.business || item.submitted_by.name || "Seller"}
+            </p>
+            <p className="text-xs text-ked-text-muted">
+              {[item.submitted_by.name, item.submitted_by.email].filter(Boolean).join(" | ")}
+            </p>
+          </div>
+        )}
+
+        {image && (
+          <div className="mb-5">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-ked-text-muted">Submitted image</p>
+            <a href={image} target="_blank" rel="noreferrer">
+              <img src={image} alt={`Submitted ${kind} preview`} className="max-h-72 rounded-xl border border-ked-border bg-white object-contain" />
+            </a>
+          </div>
+        )}
+
+        {item.review_type === "update" && (
+          <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            This is an edit to already published content. Changed fields show the currently live value below the requested value.
+          </div>
+        )}
+
+        <div className="grid gap-3 md:grid-cols-2">
+          {fields.map(([label, path, format]) => {
+            const requested = getPath(item, path);
+            const previous = current ? getPath(current, path) : undefined;
+            const changed = current && valuesDiffer(previous, requested);
+            return (
+              <div key={path} className={`rounded-xl border bg-white p-4 ${changed ? "border-blue-300" : "border-ked-border"}`}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ked-text-muted">{label}</p>
+                <p className="mt-1 whitespace-pre-wrap break-words text-sm text-ked-text">{displayValue(requested, format)}</p>
+                {changed && (
+                  <p className="mt-2 border-t border-blue-100 pt-2 text-xs text-blue-800">
+                    Currently published: {displayValue(previous, format)}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {item.moderation_note && (
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-800">Previous moderation note</p>
+            <p className="mt-1 text-sm text-amber-900">{item.moderation_note}</p>
+          </div>
+        )}
+
+        {children && <div className="mt-5 flex flex-wrap justify-end gap-2 border-t border-ked-border pt-5">{children}</div>}
+      </div>
+    </details>
+  );
+}
+
+function EmptyReviewState() {
+  return <p className="rounded-xl border border-dashed border-ked-border py-12 text-center text-sm text-ked-text-muted">No records to review.</p>;
 }
 
 function Row({ title, subtitle, status, children }) {

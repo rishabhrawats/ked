@@ -149,10 +149,16 @@ def moderation_view(document: dict[str, Any] | None) -> dict[str, Any] | None:
         return result
     pending_changes = result.pop("pending_changes", None)
     if result.pop("review_status", None) == "pending" and pending_changes:
+        current_version = dict(result)
+        current_version.pop("moderation_note", None)
         published_status = result.get("status")
         result.update(pending_changes)
         result["status"] = "pending"
         result["published_status"] = published_status
+        result["review_type"] = "update"
+        result["current_version"] = current_version
+    elif result.get("status") == "pending":
+        result["review_type"] = "new"
     return result
 
 
@@ -848,10 +854,14 @@ async def admin_overview(
 async def admin_users(
     user: dict[str, Any] = Depends(super_admin),
 ) -> list[dict[str, Any]]:
-    return [
-        moderation_view(item)
-        async for item in db.users.find({}).sort("created_at", DESCENDING)
-    ]
+    results = []
+    async for item in db.users.find({}).sort("created_at", DESCENDING):
+        result = moderation_view(item)
+        profile = await db.profiles.find_one({"owner_id": item["id"]})
+        if profile:
+            result["profile"] = moderation_view(profile)
+        results.append(result)
+    return results
 
 
 @api.patch("/admin/users/{user_id}")
@@ -899,10 +909,19 @@ async def admin_content(
     user: dict[str, Any] = Depends(super_admin),
 ) -> list[dict[str, Any]]:
     _, collection = admin_collection(content_type)
-    return [
-        moderation_view(item)
-        async for item in collection.find({}).sort("updated_at", DESCENDING)
-    ]
+    results = []
+    async for item in collection.find({}).sort("updated_at", DESCENDING):
+        result = moderation_view(item)
+        owner = await db.users.find_one({"id": item.get("owner_id")})
+        profile = await db.profiles.find_one({"owner_id": item.get("owner_id")})
+        result["submitted_by"] = {
+            "id": item.get("owner_id"),
+            "name": (owner or {}).get("name", ""),
+            "email": (owner or {}).get("email", ""),
+            "business": (profile or {}).get("business", ""),
+        }
+        results.append(result)
+    return results
 
 
 @api.patch("/admin/content/{content_type}/{item_id}")

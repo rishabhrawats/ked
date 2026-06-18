@@ -77,3 +77,13 @@ def test_moderation_view_exposes_pending_edit_without_changing_live_status():
     assert output["name"] == "Pending name"
     assert output["status"] == "pending"
     assert output["published_status"] == "published"
+    assert output["review_type"] == "update"
+    assert output["current_version"]["name"] == "Live name"
+
+
+def test_moderation_view_marks_new_pending_submission():
+    output = server.moderation_view(
+        {"id": "post_test", "status": "pending", "title": "New story"}
+    )
+    assert output["review_type"] == "new"
+    assert "current_version" not in output
